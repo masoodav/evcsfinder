@@ -24,32 +24,6 @@ db.stations.create_index([("AddressInfo.Title", "text"), ("AddressInfo.AddressLi
 def health():
     return jsonify({"status": "ok"})
 
-# Endpoint: Get All Charging Stations
-@app.route("/stations", methods=["GET"])
-def get_stations():
-    stations = db.stations.find()
-    result = []
-    for station in stations:
-        result.append({
-            "ID": station.get("ID"),
-            "UUID": station.get("UUID"),
-            "DataProviderID": station.get("DataProviderID"),
-            "OperatorID": station.get("OperatorID"),
-            "UsageTypeID": station.get("UsageTypeID"),
-            "UsageCost": station.get("UsageCost"),
-            "AddressInfo": station.get("AddressInfo", {}),
-            "Connections": station.get("Connections", []),
-            "NumberOfPoints": station.get("NumberOfPoints", 0),
-            "GeneralComments": station.get("GeneralComments"),
-            "StatusTypeID": station.get("StatusTypeID"),
-            "DateLastStatusUpdate": station.get("DateLastStatusUpdate"),
-            "DateCreated": station.get("DateCreated"),
-            "DateLastVerified": station.get("DateLastVerified"),
-            "SubmissionStatusTypeID": station.get("SubmissionStatusTypeID"),
-            "MediaItems": station.get("MediaItems", [])
-        })
-    return jsonify(result)
-
 # Endpoint: Search Charging Stations by Address
 @app.route("/stations/search", methods=["GET"])
 def search_stations():
@@ -57,9 +31,12 @@ def search_stations():
     if not address_query:
         return jsonify({"error": "Address parameter is required"}), 400
 
-    stations = db.stations.find({"$text": {"$search": address_query}}, {"_id": 0})
+    # Use regex to perform an exact match search
+    regex = f"^.*{address_query}.*$"
+    stations = db.stations.find({"AddressInfo.Title": {"$regex": regex, "$options": "i"}}, {"_id": 0})
     result = [station for station in stations]
     return jsonify(result)
+
 
 # Endpoint: Check Database Status
 @app.route("/db-status", methods=["GET"])

@@ -23,7 +23,7 @@ ENV REACT_APP_API_URL=${REACT_APP_API_URL}
 FROM base as development
 
 # Use nodemon to start the React app with polling
-CMD ["nodemon", "-L", "--watch", "src", "--watch", "public", "--ext", "js,jsx", "--exec", "npm start"]
+CMD ["nodemon", "-L", "--watch", "src", "--watch", "public", "--ext", "js,jsx,.css", "--exec", "npm start"]
 
 # Stage 3: Build the React app
 FROM base as build

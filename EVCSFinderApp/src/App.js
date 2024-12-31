@@ -1,33 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import ApiConfig from "./ApiConfig";
+import "./App.css"; // Import the CSS file
 
 function App() {
   const [stations, setStations] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true); // Initially set to true to show loading on first render
-
-  useEffect(() => {
-    if (!ApiConfig.search) {
-      console.error("API URL for search is not set.");
-      return;
-    }
-  }, []);
-
-
-  const fetchStations = () => {
-    setLoading(true);
-    axios
-      .get(ApiConfig.search)
-      .then((response) => {
-        setStations(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error searching stations:", error);
-        setLoading(false);
-      });
-  };
+  const [loading, setLoading] = useState(false);
 
   const searchStations = () => {
     setLoading(true);
@@ -45,33 +24,48 @@ function App() {
   };
 
   return (
-    <div>
-      <h1>EV Charger Finder</h1>
-      <div>
+    <div className="app-container">
+      <h1 className="title">EV Charger Finder</h1>
+      <div className="search-container">
         <input
           type="text"
-          placeholder="Search by address, city, or country"
+          placeholder="Search by address"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
         />
-        <button onClick={searchStations}>Search</button>
+        <button onClick={searchStations} className="search-button">Search</button>
       </div>
       {loading ? (
-        <p>Loading...</p>
+        <div className="loader">Loading...</div>
       ) : (
-        <ul>
+        <ul className="stations-list">
           {stations.map((station) => (
-            station.location && station.location.lat && station.location.lng ? (
-              <div key={station._id}>
-                <h3>{station.name}</h3>
-                <p>Location: {station.location.lat}, {station.location.lng}</p>
-              </div>
-            ) : (
-              <div key={station._id}>
-                <h3>{station.name}</h3>
-                <p>Location data unavailable</p>
-              </div>
-            )
+            <li key={station.ID} className="station-item">
+              <h3>{station.AddressInfo.Title}</h3>
+              <p>Address: {station.AddressInfo.AddressLine1}, {station.AddressInfo.Town}, {station.AddressInfo.StateOrProvince}, {station.AddressInfo.Postcode}, {station.AddressInfo.CountryID}</p>
+              <p>City: {station.AddressInfo.Town}</p>
+              <p>Country: {station.AddressInfo.CountryID}</p>
+              <p>Latitude: {station.AddressInfo.Latitude}</p>
+              <p>Longitude: {station.AddressInfo.Longitude}</p>
+              <p>Number of Points: {station.NumberOfPoints}</p>
+              <p>Usage Cost: {station.UsageCost || "N/A"}</p>
+              <p>General Comments: {station.GeneralComments || "None"}</p>
+              <p>Connections:</p>
+              <ul className="connections-list">
+                {station.Connections.map((connection) => (
+                  <li key={connection.ID} className="connection-item">
+                    <p>Connection Type ID: {connection.ConnectionTypeID}</p>
+                    <p>Current Type ID: {connection.CurrentTypeID}</p>
+                    <p>Level ID: {connection.LevelID}</p>
+                    <p>Power (kW): {connection.PowerKW}</p>
+                    <p>Quantity: {connection.Quantity}</p>
+                    <p>Status Type ID: {connection.StatusTypeID}</p>
+                  </li>
+                ))}
+              </ul>
+              <hr />
+            </li>
           ))}
         </ul>
       )}
