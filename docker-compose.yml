@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+
+  evcsfinder-db:
+    build:
+      context: ./EVCSFinderDb
+    container_name: evcsfinder-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - backend
+    restart: always
+
+  evcsfinder-service:
+    build: ./EVCSFinderService
+    container_name: evcsfinder-service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - evcsfinder-db
+    networks:
+      - backend
+    environment:
+      DATABASE_URL: mongodb://evcsfinder-db:27017/ev_charging
+    volumes:
+      - ocm-data:/data
+      - ./EVCSFinderService/src:/app/src
+
+  evcsfinder-app-dev:
+    build:
+      context: ./EVCSFinderApp
+      target: development
+      args:
+        REACT_APP_API_URL: http://localhost:5000
+    container_name: evcsfinder-app-dev
+    ports:
+      - "3000:3000" # Exposing port 3000 for React development server
+    depends_on:
+      - evcsfinder-service
+    networks:
+      - backend
+    volumes:
+      - ./EVCSFinderApp/src:/app/src
+      - ./EVCSFinderApp/public:/app/public
+  
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  evcsfinder-app-prod:
+    build:
+      context: ./EVCSFinderApp
+      target: build
+    container_name: evcsfinder-app-prod
+    ports:
+      - "8080:80"
+    depends_on:
+      - evcsfinder-app-dev
+    volumes:
+      - ./EVCSFinderApp/build:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - backend
+
+volumes:
+  mongo-data:
+  ocm-data:
+
+networks:
+  backend:
+    driver: bridge
