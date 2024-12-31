@@ -11,7 +11,6 @@ EVCSFinder is an open-source project designed to help users find Electric Vehicl
 
 The data provided by OpenChargeMap is open-source but subject to specific usage terms and conditions. OpenChargeMap's data may be used in accordance with their [terms of use](https://openchargemap.org/site/terms) and license. Please ensure you are compliant with these terms when using this data.
 
-For the software code and repository content, this project is licensed under the **MIT License**.
 
 ## Project Structure
 
@@ -69,9 +68,8 @@ Data Directory
 The charging station data is located in the ocm-data volume, which is populated from the OpenChargeMap export files (referencedata.json and country-specific files). When the Docker containers start, the data is imported into MongoDB.
 
 API Endpoints
-GET /stations: Fetch all charging stations.
-GET /stations/{id}: Get details of a specific charging station by ID.
-GET /search: Search for stations based on filters such as location, type, and availability.
+TODO
+
 Data Import from OpenChargeMap
 The data from OpenChargeMap is provided as JSON files. These files contain detailed information about charging stations, metadata, and country references. The referencedata.json file is used to enrich the POI data with additional metadata (e.g., country, station type).
 
