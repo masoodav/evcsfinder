@@ -29,15 +29,14 @@ services:
       - ocm-data:/data
       - ./EVCSFinderService/src:/app/src
 
-  evcsfinder-app-dev:
+  evcsfinder-app:
     build:
       context: ./EVCSFinderApp
-      target: development
       args:
         REACT_APP_API_URL: http://localhost:5000
-    container_name: evcsfinder-app-dev
+    container_name: evcsfinder-app
     ports:
-      - "3000:3000" # Exposing port 3000 for React development server
+      - "3000:3000"
     depends_on:
       - evcsfinder-service
     networks:
@@ -48,21 +47,6 @@ services:
   
     environment:
       - CHOKIDAR_USEPOLLING=true
-
-  evcsfinder-app-prod:
-    build:
-      context: ./EVCSFinderApp
-      target: build
-    container_name: evcsfinder-app-prod
-    ports:
-      - "8080:80"
-    depends_on:
-      - evcsfinder-app-dev
-    volumes:
-      - ./EVCSFinderApp/build:/usr/share/nginx/html:ro
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    networks:
-      - backend
 
 volumes:
   mongo-data:

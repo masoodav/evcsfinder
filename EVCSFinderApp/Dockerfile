@@ -1,5 +1,5 @@
-# Stage 1: Base image for development
-FROM node:18-alpine as base
+# Base image for development
+FROM node:18-alpine
 
 # Set the working directory
 WORKDIR /app
@@ -10,36 +10,15 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
-# Install nodemon globally
-RUN npm install -g nodemon
+# Set build-time argument and environment variable
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=${REACT_APP_API_URL}
 
 # Copy the application code
 COPY . .
 
-ARG REACT_APP_API_URL
-ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+# Install development dependencies (like nodemon)
+RUN npm install --save-dev nodemon
 
-# Stage 2: Development image with nodemon
-FROM base as development
-
-# Use nodemon to start the React app with polling
-CMD ["nodemon", "-L", "--watch", "src", "--watch", "public", "--ext", "js,jsx,.css", "--exec", "npm start"]
-
-# Stage 3: Build the React app
-FROM base as build
-
-# Copy application code and install dependencies (again, if needed)
-COPY . .
-RUN npm run build
-
-# Stage 4: Production image with nginx
-FROM nginx:alpine
-
-# Copy the React build output to the nginx directory
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Expose the app ports
-EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Use nodemon to start the React app
+CMD ["npx", "nodemon", "-L", "--watch", "src", "--watch", "public", "--ext", "js,jsx,css", "--exec", "npm start"]
