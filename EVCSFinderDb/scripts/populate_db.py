@@ -17,7 +17,6 @@ db = client.get_database()
 
 BATCH_SIZE = 100  # Adjust batch size as needed
 
-
 def process_file(file_path):
     """Read and load JSON data from a file."""
     try:
@@ -30,14 +29,12 @@ def process_file(file_path):
         logging.error(f"Error processing {file_path}: {e}")
         return []
 
-
 def load_referencedata(referencedata_path):
     """Load reference data for ID lookups."""
     if not os.path.exists(referencedata_path):
         logging.error(f"Referencedata file {referencedata_path} does not exist.")
         return {}
     return process_file(referencedata_path)
-
 
 def sanitize_poi_data(poi_data):
     """Sanitize POI data by removing or replacing invalid fields."""
@@ -54,18 +51,37 @@ def sanitize_poi_data(poi_data):
         sanitized_data.append(poi)
     return sanitized_data
 
-
 def optimize_data_with_referencedata(poi_data, referencedata):
     """Optimize POI data by replacing IDs with human-readable values."""
     sanitized_data = sanitize_poi_data(poi_data)
-    for poi in sanitized_data:
-        if "CountryID" in poi and poi["CountryID"] in referencedata.get("Countries", {}):
-            poi["Country"] = referencedata["Countries"][poi["CountryID"]]
-        if "ConnectionTypeID" in poi and poi["ConnectionTypeID"] in referencedata.get("ConnectionTypes", {}):
-            poi["ConnectionType"] = referencedata["ConnectionTypes"][poi["ConnectionTypeID"]]
-        # Add more mappings here as needed
-    return sanitized_data
 
+    # Create a lookup dictionary for countries by their ID
+    country_lookup = {country["ID"]: country["Title"] for country in referencedata.get("Countries", [])}
+    
+    # Create a lookup dictionary for connection types by their ID
+    conn_type_lookup = {conn["ID"]: conn["Title"] for conn in referencedata.get("ConnectionTypes", [])}
+
+    # Create a lookup dictionary for current types by their ID
+    current_type_lookup = {curr_type["ID"]: curr_type["Title"] for curr_type in referencedata.get("CurrentTypes", [])}
+
+    for poi in sanitized_data:
+        # Replace CountryID in AddressInfo if it exists
+        if "AddressInfo" in poi and "CountryID" in poi["AddressInfo"]:
+            country_id = poi["AddressInfo"]["CountryID"]
+            if country_id in country_lookup:
+                poi["AddressInfo"]["Country"] = country_lookup[country_id]
+        
+        # Replace ConnectionTypeID and CurrentTypeID in Connections if they exist
+        if "Connections" in poi:
+            for connection in poi["Connections"]:
+                conn_type_id = connection.get("ConnectionTypeID")
+                if conn_type_id in conn_type_lookup:
+                    connection["ConnectionType"] = conn_type_lookup[conn_type_id]
+                current_type_id = connection.get("CurrentTypeID")
+                if current_type_id in current_type_lookup:
+                    connection["CurrentType"] = current_type_lookup[current_type_id]
+    
+    return sanitized_data
 
 def load_ocm_data(data_dir, referencedata_path):
     """Load OCM data from multiple JSON files in nested directories into MongoDB."""
@@ -139,7 +155,6 @@ def load_ocm_data(data_dir, referencedata_path):
             logging.error(f"Error inserting final batch: {e}")
 
     logging.info(f"Inserted {total_inserted} documents into the 'stations' collection.")
-
 
 if __name__ == "__main__":
     referencedata_path = "/app/ocm-export/data/referencedata.json"

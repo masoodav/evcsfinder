@@ -16,7 +16,7 @@ db_url = os.getenv("DATABASE_URL", "mongodb://evcsfinder-db:27017/ev_charging")
 client = MongoClient(db_url)
 db = client.get_database()
 
-# Ensure you have a text index on the AddressInfo field
+# Ensure to have a text index on the AddressInfo field
 db.stations.create_index([("AddressInfo.Title", "text"), ("AddressInfo.AddressLine1", "text"), ("AddressInfo.Town", "text"), ("AddressInfo.StateOrProvince", "text"), ("AddressInfo.Postcode", "text"), ("AddressInfo.CountryID", "text")])
 
 # Endpoint: Health Check
