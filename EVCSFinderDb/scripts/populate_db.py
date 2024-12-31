@@ -7,7 +7,7 @@ import sys
 from pymongo.errors import BulkWriteError
 
 # Configure logging
-logging.basicConfig(level=logging.ERROR, format="%(message)s")
+logging.basicConfig(level=logging.ERROR, format="%(message)s")  # Updated to DEBUG level
 sys.stdout.reconfigure(line_buffering=True)  # Ensure logs are not buffered
 
 # Database configuration
@@ -83,8 +83,10 @@ def optimize_data_with_referencedata(poi_data, referencedata):
     
     return sanitized_data
 
-def load_ocm_data(data_dir, referencedata_path):
+def load_ocm_data(data_dir, referencedata_path, force_load=False):
     """Load OCM data from multiple JSON files in nested directories into MongoDB."""
+    logging.debug(f"Force Load: {force_load}")  # Log the force load status
+
     if not os.path.exists(data_dir):
         logging.error(f"Data directory {data_dir} does not exist.")
         return
@@ -92,6 +94,19 @@ def load_ocm_data(data_dir, referencedata_path):
     referencedata = load_referencedata(referencedata_path)
     if not referencedata:
         logging.error("Failed to load referencedata. Aborting.")
+        return
+
+    # Check if the collection is already populated
+    if not force_load and db.stations.estimated_document_count() > 0:
+        logging.info("Database is already populated. Skipping data load.")
+        return
+
+    # Clear existing data
+    try:
+        db.stations.delete_many({})
+        logging.info("Cleared existing data from the 'stations' collection.")
+    except Exception as e:
+        logging.error(f"Error clearing data from 'stations' collection: {e}")
         return
 
     # Collect all JSON files
@@ -107,14 +122,6 @@ def load_ocm_data(data_dir, referencedata_path):
         return
 
     logging.info(f"Found {len(file_list)} files to process.")
-
-    # Clear existing data
-    try:
-        db.stations.delete_many({})
-        logging.info("Cleared existing data from the 'stations' collection.")
-    except Exception as e:
-        logging.error(f"Error clearing data from 'stations' collection: {e}")
-        return
 
     # Process files and insert data in batches
     current_batch = []
@@ -157,6 +164,7 @@ def load_ocm_data(data_dir, referencedata_path):
     logging.info(f"Inserted {total_inserted} documents into the 'stations' collection.")
 
 if __name__ == "__main__":
+    force_load = os.getenv("FORCE_LOAD", "false").lower() == "true"
     referencedata_path = "/app/ocm-export/data/referencedata.json"
     data_dir = "/app/ocm-export/data"
-    load_ocm_data(data_dir, referencedata_path)
+    load_ocm_data(data_dir, referencedata_path, force_load=force_load)

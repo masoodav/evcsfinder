@@ -13,6 +13,8 @@ services:
     networks:
       - backend
     restart: always
+    environment:
+      - FORCE_LOAD=${FORCE_LOAD:-false}
 
   evcsfinder-service:
     build: ./EVCSFinderService
