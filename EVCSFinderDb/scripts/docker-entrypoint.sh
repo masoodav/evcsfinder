@@ -10,8 +10,9 @@ until mongo --eval "print('MongoDB is ready')" 2>/dev/null; do
 done
 
 # Populate the MongoDB database
+echo "Populating the database, please wait. This might take a few minutes..."
 python3 -u /app/scripts/populate_db.py
-echo "Database populated"
+echo "Database successfully populated"
 
 # Keep MongoDB running in the foreground
 wait
