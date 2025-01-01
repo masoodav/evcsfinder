@@ -44,8 +44,7 @@ Build and start the services:
 
 2. **Run the following command to build and start all the services defined in docker-compose.yml:**
 
-bash
-Copy code
+```bash
 FORCE_LOAD=true docker-compose up --build
 FORCE_LOAD=true: This flag will instruct the evcsfinder-db container to clone the OpenChargeMap Export Repository and load the data into the MongoDB database.
 Subsequent Runs: If the database is already loaded (after the first run), you can set FORCE_LOAD=false to skip reloading the data.
