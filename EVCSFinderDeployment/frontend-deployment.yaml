@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: evcsfinder
+      tier: frontend
+      track: stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: evcsfinder
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+      - name: evcsfinder-app
+        image: masoodav/evcsfinder-app:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REACT_APP_API_URL
+          value: "http://localhost:5000"
+...
