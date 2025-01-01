@@ -36,15 +36,12 @@ MongoDB: Database with persistent storage.
 Flask API: Backend service running on port 5000.
 React Frontend: Development server running on port 3000.
 1. **Clone the repository**:
-
-   ```bash
    git clone https://github.com/your-username/evcsfinder.git
    cd evcsfinder
 Build and start the services:
 
 2. **Run the following command to build and start all the services defined in docker-compose.yml:**
 
-```bash
 FORCE_LOAD=true docker-compose up --build
 FORCE_LOAD=true: This flag will instruct the evcsfinder-db container to clone the OpenChargeMap Export Repository and load the data into the MongoDB database.
 Subsequent Runs: If the database is already loaded (after the first run), you can set FORCE_LOAD=false to skip reloading the data.
@@ -63,7 +60,6 @@ The application is deployed using Kubernetes. The evcsfinder deployment manifest
 To Deploy the Application:
 1. **Run the following command to start the Kubernetes deployment:**
 
-bash
 ./evcs-deploy-control.sh start
 
 2. **Access the services:**
@@ -72,7 +68,6 @@ Backend API: Access the Flask-based API at http://localhost:5000
    
 3.**To Stop the Kubernetes Cluster:**
 
-bash
 ./evcs-deploy-control.sh stop
 This script automates the deployment and shutdown process of the Kubernetes cluster for the EVCSFinder application.
 
