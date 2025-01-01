@@ -1,0 +1,162 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evcsfinder-db
+  labels:
+    app: evcsfinder-db
+spec:
+  selector:
+    app: evcsfinder-db
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evcsfinder-db
+  labels:
+    app: evcsfinder-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evcsfinder-db
+  template:
+    metadata:
+      labels:
+        app: evcsfinder-db
+    spec:
+      containers:
+      - name: evcsfinder-db
+        image: masoodav/evcsfinder-db
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+        env:
+        - name: FORCE_LOAD
+          value: "true"
+      volumes:
+      - name: mongo-data
+        persistentVolumeClaim:
+          claimName: mongo-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evcsfinder-service
+  labels:
+    app: evcsfinder-service
+spec:
+  selector:
+    app: evcsfinder-service
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evcsfinder-service
+  labels:
+    app: evcsfinder-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evcsfinder-service
+  template:
+    metadata:
+      labels:
+        app: evcsfinder-service
+    spec:
+      containers:
+      - name: evcsfinder-service
+        image: masoodav/evcsfinder-service
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DATABASE_URL
+          value: mongodb://evcsfinder-db:27017/ev_charging
+        volumeMounts:
+        - name: ocm-data
+          mountPath: /data
+      volumes:
+      - name: ocm-data
+        persistentVolumeClaim:
+          claimName: ocm-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ocm-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evcsfinder-app
+  labels:
+    app: evcsfinder-app
+spec:
+  type: LoadBalancer
+  selector:
+    app: evcsfinder-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evcsfinder-app
+  labels:
+    app: evcsfinder-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evcsfinder-app
+  template:
+    metadata:
+      labels:
+        app: evcsfinder-app
+    spec:
+      containers:
+      - name: evcsfinder-app
+        image: masoodav/evcsfinder-app
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REACT_APP_API_URL
+          value: "http://evcsfinder-service.default.svc.cluster.local:5000"
