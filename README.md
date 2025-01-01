@@ -1,106 +1,92 @@
 # EVCSFinder
 
-EVCSFinder is an open-source project designed to help users find Electric Vehicle Charging Stations (EVCS) worldwide. The project leverages data from OpenChargeMap (OCM) to provide a comprehensive, easy-to-use platform for locating EV charging stations.
+**EVCSFinder** is an open-source project aimed at helping users find Electric Vehicle Charging Stations (EVCS) worldwide. The platform leverages data from **OpenChargeMap (OCM)** to provide a comprehensive and easy-to-use solution for locating EV charging stations.
 
 ## Credits
 
 - **Data Source**: The data for this project is sourced from [OpenChargeMap](https://github.com/openchargemap/ocm-export) and the [OpenChargeMap platform](https://openchargemap.org/), which provides global data on EV charging stations.
-- **Project Type**: This is an open-source project under the MIT License.
 
 ## License Information
 
-The data provided by OpenChargeMap is open-source but subject to specific usage terms and conditions. OpenChargeMap's data may be used in accordance with their [terms of use](https://openchargemap.org/site/terms) and license. Please ensure you are compliant with these terms when using this data.
+The data provided by OpenChargeMap is open-source, but it is subject to specific usage terms and conditions. You may use OpenChargeMap's data in accordance with their [terms of use](https://openchargemap.org/site/terms) and license. Please ensure compliance with these terms when using the data.
 
+## Project Type 
+This is an academic project to demonstrate a microservice-based application architecture for EV charging station discovery.
 
 ## Project Structure
 
-The project is composed of the following services:
+The project consists of the following services:
 
-1. **evcsfinder-db**: MongoDB service that stores charging station data.
-2. **evcsfinder-service**: A Flask-based backend service that exposes APIs to search and retrieve data from the MongoDB database.
-3. **evcsfinder-app-dev**: React development frontend application for interacting with the EVCS data.
-4. **evcsfinder-app-prod**: React production frontend application, served via NGINX.
+1. **evcsfinder-db**: MongoDB service for storing charging station data.
+2. **evcsfinder-service**: Flask-based backend service that provides APIs to search and retrieve data from MongoDB.
+3. **evcsfinder-app**: React frontend application for interacting with the EVCS data.
 
 ### Backend Service (Flask)
 
-The `evcsfinder-service` is a Flask-based backend API. It connects to MongoDB and allows the frontend to query the charging station data stored in the database.
+The `evcsfinder-service` is a Flask-based backend API. It connects to the MongoDB database and allows the frontend to query and retrieve charging station data.
 
 ### Frontend
 
-The frontend is a React application, with separate setups for both development and production environments.
-
-- **Development**: A React app running on port `3000` for easy development and debugging.
-- **Production**: The app is bundled and served via NGINX on port `8080`.
+The frontend is built using **React** and serves as the user interface to interact with the EV charging station data.
 
 ## Running the Project
 
 ### Prerequisites
 
-Ensure the following are installed before setting up the project:
-
-- Docker
-- Docker Compose
+Prerequisites
+Before setting up the project, ensure that Docker Desktop is installed. Docker Desktop includes everything you need to build and run containerized applications, along with Docker Compose and Kubernetes (for local development and orchestration). This project has been tested with Windows and Git Bash.
 
 ### Setup Instructions
+#### Development setup using Docker Compose
+For local development, Docker Compose sets up the following environment:
 
+MongoDB: Database with persistent storage.
+Flask API: Backend service running on port 5000.
+React Frontend: Development server running on port 3000.
 1. **Clone the repository**:
 
    ```bash
    git clone https://github.com/your-username/evcsfinder.git
    cd evcsfinder
-2. Build and start the services:
+Build and start the services:
 
-Run the following command to start all the services defined in the docker-compose.yml:
-docker-compose up --build
-3. Access the services:
+2. **Run the following command to build and start all the services defined in docker-compose.yml:**
 
-Frontend (Development): http://localhost:3000
-Frontend (Production): http://localhost:8080
-Backend API: http://localhost:5000
+bash
+Copy code
+FORCE_LOAD=true docker-compose up --build
+FORCE_LOAD=true: This flag will instruct the evcsfinder-db container to clone the OpenChargeMap Export Repository and load the data into the MongoDB database.
+Subsequent Runs: If the database is already loaded (after the first run), you can set FORCE_LOAD=false to skip reloading the data.
+This feature allows you to reload data whenever new OpenChargeMap data is available.
 
-4. Database:
+3. **Access the services:**
 
-MongoDB is used to store the EV charging station data. The database can be accessed at the following URL:
+Frontend: Visit the React application at http://localhost:3000
+Backend API: Access the Flask-based API at http://localhost:5000
 
-MongoDB: mongodb://evcsfinder-db:27017/ev_charging
+MongoDB is used to store the EV charging station data.
 
-Data Directory
-The charging station data is located in the ocm-data volume, which is populated from the OpenChargeMap export files (referencedata.json and country-specific files). When the Docker containers start, the data is imported into MongoDB.
+#### Deployment using Kubernetes
+The application is deployed using Kubernetes. The evcsfinder deployment manifests are provided in the EVCSFinderDeployment directory.
 
-API Endpoints
-TODO
+To Deploy the Application:
+1. **Run the following command to start the Kubernetes deployment:**
 
-Data Import from OpenChargeMap
-The data from OpenChargeMap is provided as JSON files. These files contain detailed information about charging stations, metadata, and country references. The referencedata.json file is used to enrich the POI data with additional metadata (e.g., country, station type).
+bash
+./evcs-deploy-control.sh start
 
-referencedata.json: Contains ID lookups for country codes, connection types, and other metadata fields.
-Country folders: Each folder represents a country, named by its 2-digit ISO code (e.g., US, GB). These folders contain JSON files representing POIs (Points of Interest) for the charging stations in that country.
-Project Workflow
-Database: MongoDB stores the charging station data and serves it via the backend API.
-Backend: The Flask service provides an API to search for charging stations.
-Frontend: The React frontend enables users to search and view charging stations in an interactive UI.
-Development Setup
-For local development, Docker Compose will automatically set up the environment:
+2. **Access the services:**
+Frontend: Visit the React application at http://localhost:3000
+Backend API: Access the Flask-based API at http://localhost:5000
+   
+3.**To Stop the Kubernetes Cluster:**
 
-MongoDB: The database is configured with persistent storage.
-Flask API: Backend service running on port 5000.
-React Frontend: Development server running on port 3000.
-Environment Variables
-DATABASE_URL: The URL for the MongoDB service (e.g., mongodb://evcsfinder-db:27017/ev_charging).
-React app uses REACT_APP_API_URL to point to the backend API (e.g., http://localhost:5000).
+bash
+./evcs-deploy-control.sh stop
+This script automates the deployment and shutdown process of the Kubernetes cluster for the EVCSFinder application.
 
-## Deployment
-To deploy the application for production, use the following:
+### Acknowledgements
+The data from OpenChargeMap is provided as JSON files. These files contain detailed information about charging stations, including metadata and country references.
+Data Provided by: OpenChargeMap.
+Thanks to OpenChargeMap community for providing detailed and global EV charging station data.
 
-Build the production React app:
-
-docker-compose up --build
-
-## License
-The code is available under the MIT License.
-
-For the OpenChargeMap data, please refer to their terms of use and license.
-
-## Acknowledgements
-Data provided by OpenChargeMap and OpenChargeMap website.
-Thanks to contributors and the OpenChargeMap community for providing detailed and global EV charging station data.
