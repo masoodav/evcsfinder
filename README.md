@@ -36,9 +36,10 @@ For local development, Docker Compose sets up the following environment:
 MongoDB: Database with persistent storage.
 Flask API: Backend service running on port 5000.
 React Frontend: Development server running on port 3000.
+
 1. **Clone the repository**:
 
-   git clone [https://github.com/your-username/evcsfinder.git](https://github.com/your-username/evcsfinder.git)
+   git clone [https://github.com/your-username/evcsfinder.git](https://github.com/your-username/evcsfinder.git)  
    cd evcsfinder
 
 3. **Run the following command to build and start all the services defined in docker-compose.yml:**
