@@ -21,14 +21,6 @@ The project consists of the following services:
 2. **evcsfinder-service**: Flask-based backend service that provides APIs to search and retrieve data from MongoDB.
 3. **evcsfinder-app**: React frontend application for interacting with the EVCS data.
 
-### Backend Service (Flask)
-
-The `evcsfinder-service` is a Flask-based backend API. It connects to the MongoDB database and allows the frontend to query and retrieve charging station data.
-
-### Frontend
-
-The frontend is built using **React** and serves as the user interface to interact with the EV charging station data.
-
 ## Running the Project
 
 ### Prerequisites
